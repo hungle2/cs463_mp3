@@ -122,11 +122,17 @@ public class Checkpoint1 {
 		List<Input> max_list = null;
 		for (Transaction i : tx){
 			List<Input> lo = i.getInputs();	
-			if (lo.size() > max)
+			//System.out.println(lo.size());
+			if (lo.size() > max){
 				max_list = lo;
+				max = lo.size();
+			}
+
 		}
 		List<String> result = new ArrayList<String>();
+
 		for (Input j : max_list){
+			//System.out.println("test");
 			result.add(j.getPreviousOutput().getAddress());
 		}		
 
