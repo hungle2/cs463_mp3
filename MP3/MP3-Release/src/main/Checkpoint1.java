@@ -1,6 +1,8 @@
 package main;
 
 import java.util.List;
+import java.util.ArrayList;
+import info.blockchain.api.blockexplorer.*;
 
 public class Checkpoint1 {
 
@@ -11,9 +13,17 @@ public class Checkpoint1 {
 	 * 
 	 * @return size of the block
 	 */
+	BlockExplorer be = new BlockExplorer();
 	public long getBlockSize() {
 		// TODO implement me
-		return 0L;
+		Block a = null;
+		try{
+			a = be.getBlock("000000000000000f5795bfe1de0381a44d4d5ea2ad81c21d77f275bffa03e8b3");	
+		}
+		catch (Exception e){
+
+		}
+		return a.getSize();
 	}
 
 	/**
@@ -25,7 +35,14 @@ public class Checkpoint1 {
 	 */
 	public String getPrevHash() {
 		// TODO implement me
-		return null;
+		Block a = null;
+		try{
+			a = be.getBlock("000000000000000f5795bfe1de0381a44d4d5ea2ad81c21d77f275bffa03e8b3");	
+		}
+		catch (Exception e){
+
+		}
+		return a.getPreviousBlockHash();
 	}
 
 	/**
@@ -37,8 +54,15 @@ public class Checkpoint1 {
 	 * @return number of transactions in current block
 	 */
 	public int getTxCount() {
-		// TODO implement me
-		return 0;
+		Block a = null;
+		try{
+			a = be.getBlock("000000000000000f5795bfe1de0381a44d4d5ea2ad81c21d77f275bffa03e8b3");	
+		}
+		catch (Exception e){
+
+		}
+		List<Transaction> tx = a.getTransactions();
+		return tx.size();
 	}
 
 	/**
@@ -51,8 +75,27 @@ public class Checkpoint1 {
 	 * @return list of output addresses
 	 */
 	public List<String> getOutputAddresses() {
-		// TODO implement me
-		return null;
+		Block a = null;
+		try{
+			a = be.getBlock("000000000000000f5795bfe1de0381a44d4d5ea2ad81c21d77f275bffa03e8b3");	
+		}
+		catch (Exception e){
+
+		}
+		List<Transaction> tx = a.getTransactions();
+		int max = -1;
+		List<Output> max_list = null;
+		for (Transaction i : tx){
+			List<Output> lo = i.getOutputs();	
+			if (lo.size() > max)
+				max_list = lo;
+		}
+		List<String> result = new ArrayList<String>();
+		for (Output j : max_list){
+			result.add(j.getAddress());
+		}
+
+		return result;
 	}
 
 	/**
