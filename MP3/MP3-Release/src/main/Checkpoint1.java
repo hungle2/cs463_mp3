@@ -89,8 +89,10 @@ public class Checkpoint1 {
 		List<Output> max_list = null;
 		for (Transaction i : tx){
 			List<Output> lo = i.getOutputs();	
-			if (lo.size() > max)
+			if (lo.size() > max){
 				max_list = lo;
+				max = lo.size();
+			}
 		}
 		List<String> result = new ArrayList<String>();
 		for (Output j : max_list){
