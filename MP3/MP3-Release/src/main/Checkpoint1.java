@@ -1,6 +1,7 @@
 package main;
 
 import java.util.List;
+import info.blockchain.api.blockexplorer.*;
 
 public class Checkpoint1 {
 
@@ -12,8 +13,7 @@ public class Checkpoint1 {
 	 * @return size of the block
 	 */
 	public long getBlockSize() {
-		// TODO implement me
-		return 0L;
+			return 0L;
 	}
 
 	/**
