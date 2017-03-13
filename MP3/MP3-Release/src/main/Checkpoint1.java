@@ -2,6 +2,8 @@ package main;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import info.blockchain.api.blockexplorer.*;
 
 public class Checkpoint1 {
@@ -108,8 +110,27 @@ public class Checkpoint1 {
 	 * @return list of input addresses
 	 */
 	public List<String> getInputAddresses() {
-		// TODO implement me
-		return null;
+		Block a = null;
+		try{
+			a = be.getBlock("000000000000000f5795bfe1de0381a44d4d5ea2ad81c21d77f275bffa03e8b3");	
+		}
+		catch (Exception e){
+
+		}
+		List<Transaction> tx = a.getTransactions();
+		int max = -1;
+		List<Input> max_list = null;
+		for (Transaction i : tx){
+			List<Input> lo = i.getInputs();	
+			if (lo.size() > max)
+				max_list = lo;
+		}
+		List<String> result = new ArrayList<String>();
+		for (Input j : max_list){
+			result.add(j.getPreviousOutput().getAddress());
+		}		
+
+		return result;
 	}
 
 	/**
@@ -123,7 +144,36 @@ public class Checkpoint1 {
 	 */
 	public String getLargestRcv() {
 		// TODO implement me
-		return null;
+		Block a = null;
+		try{
+			a = be.getBlock("000000000000000f5795bfe1de0381a44d4d5ea2ad81c21d77f275bffa03e8b3");	
+		}
+		catch (Exception e){
+
+		}
+		List<Transaction> tx = a.getTransactions();
+		int max = -1;
+		Long sum_max = new Long(0);
+		String max_address = "";
+		
+		for (Transaction i : tx){
+			Map<String, Long> lm = new HashMap<String, Long>();
+			List<Output> ou = i.getOutputs();
+			for (Output j : ou){
+				Long val = lm.get(j.getAddress());
+				if (val == null)
+					lm.put(j.getAddress(), j.getValue());	
+				else
+					lm.put(j.getAddress(), j.getValue() + val);
+			}
+			for (Map.Entry<String,Long> k : lm.entrySet()){
+				if (k.getValue() > sum_max){
+					max_address = k.getKey();
+					sum_max = k.getValue();
+				}
+			}
+		}
+		return max_address;
 	}
 
 	/**
@@ -134,8 +184,23 @@ public class Checkpoint1 {
 	 * @return number of coin base transactions
 	 */
 	public int getCoinbaseCount() {
-		// TODO implement me
-		return 0;
+		Block a = null;
+		try{
+			a = be.getBlock("000000000000000f5795bfe1de0381a44d4d5ea2ad81c21d77f275bffa03e8b3");	
+		}
+		catch (Exception e){
+
+		}
+		int coinBases = 0;
+		List<Transaction> tx = a.getTransactions();
+		for(Transaction i: tx){
+			List<Input> inputs = i.getInputs();
+			for(Input k: inputs){
+				if(k.getPreviousOutput() == null)
+					coinBases +=1;
+			}
+		}
+		return coinBases;
 	}
 
 	/**
@@ -144,8 +209,23 @@ public class Checkpoint1 {
 	 * @return number of Satoshi generated
 	 */
 	public long getSatoshiGen() {
-		// TODO implement me
-		return 0L;
+		Block a = null;
+		try{
+			a = be.getBlock("000000000000000f5795bfe1de0381a44d4d5ea2ad81c21d77f275bffa03e8b3");	
+		}
+		catch (Exception e){
+
+		}
+		long satoshiGenerated = 0;
+		List<Transaction> tx = a.getTransactions();
+		for(Transaction i: tx){
+			List<Output> outputs = i.getOutputs();
+			List<Input> inputs	= i.getInputs();
+			satoshiGenerated += (outputs.size() - inputs.size());	//maybe more complicated, not sure yet
+		}
+	
+		
+		return satoshiGenerated;
 	}
 
 }
