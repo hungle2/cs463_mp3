@@ -1,4 +1,12 @@
 package main;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.File;
+import java.io.IOException;
+import info.blockchain.api.blockexplorer.*;
+import java.util.List;
+import java.util.ArrayList;
+
 
 public class DatasetGenerator {
 	String file;
@@ -8,8 +16,43 @@ public class DatasetGenerator {
 	}
 
 	public boolean writeTransactions() {
-		// TODO implement me
-		return false;
+		
+		//long tx = getIndex()
+		String s = "not hello";
+		File f = new File(file);
+		BufferedWriter bw = null;
+		try {
+			bw = new BufferedWriter(new FileWriter(f));
+			//bw.write(s, 0, s.length());
+		} catch (IOException x){
+			System.err.format("IOException");
+			return false;
+		} 
+
+
+		BlockExplorer be = new BlockExplorer();
+
+		List<Block> lb = new ArrayList<Block>();
+		try{
+			for (long i = 265852; i <= 266085; i++){
+				lb.addAll(be.getBlocksAtHeight(i));
+			}	
+		}
+		catch (Exception e){
+			System.err.format("Error fetching blocks");
+		}
+
+
+
+		try {
+			if (bw != null)
+				bw.close();
+		}
+		catch (IOException ex){
+			System.err.format("IOException");
+			return false;	
+		}
+		return true;
 	}
 
 	/**
