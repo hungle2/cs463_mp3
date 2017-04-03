@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -26,8 +27,32 @@ public class UserCluster {
 	 * @return true if read succeeds; false otherwise
 	 */
 	public boolean readTransactions(String file) {
-		// TODO implement me
-		return false;
+
+		BufferedReader bw = null;
+		try {
+			bw = new BufferedReader(new FileReader(file));
+		} catch (IOException x){
+			System.err.format("IOException");
+			return false;
+		} 
+		String temp = "";
+		while (true){
+			try {
+				temp = bw.readLine();
+				if (temp == null)
+					break;
+				String[] split_str = temp.split(" ");
+				//GET DATA, but what to fill up with?
+								
+			} catch (IOException x){
+				System.err.format("IOException");
+				return false;
+			} 	
+		}
+		
+		
+
+		return true;
 	}
 
 	/**
@@ -43,8 +68,7 @@ public class UserCluster {
 	 * @return number of users (i.e., clusters)
 	 */
 	public int getUserNumber() {
-		// TODO implement me
-		return 0;
+		return userMap.size();
 	}
 
 	/**
@@ -53,8 +77,12 @@ public class UserCluster {
 	 * @return size of the largest cluster
 	 */
 	public int getLargestClusterSize() {
-		// TODO implement me
-		return 0;
+		int max = 0;
+		for (List<String> i : userMap.values() ){
+			if (max < i.size())
+				max = i.size();
+		}
+		return max;
 	}
 
 	public boolean writeUserMap(String file) {

@@ -1,7 +1,6 @@
 package main;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
-import java.io.File;
 import java.io.IOException;
 import info.blockchain.api.blockexplorer.*;
 import java.util.List;
@@ -18,35 +17,70 @@ public class DatasetGenerator {
 	public boolean writeTransactions() {
 		
 		//long tx = getIndex()
-		String s = "not hello";
-		File f = new File(file);
+		
 		BufferedWriter bw = null;
 		try {
-			bw = new BufferedWriter(new FileWriter(f));
-			//bw.write(s, 0, s.length());
+			bw = new BufferedWriter(new FileWriter(file));
 		} catch (IOException x){
 			System.err.format("IOException");
 			return false;
 		} 
 
-
+		
 		BlockExplorer be = new BlockExplorer();
 
 		List<Block> lb = new ArrayList<Block>();
+		
 		try{
-			for (long i = 265852; i <= 266085; i++){
+			for (long i = 265852; i <= 266085; i++)
 				lb.addAll(be.getBlocksAtHeight(i));
-			}	
 		}
 		catch (Exception e){
 			System.err.format("Error fetching blocks");
 		}
 
-
-
+		System.out.println("Blocks fetched");
+		for (Block j : lb){
+			List<Transaction> t = j.getTransactions();
+			
+			for (Transaction i : t){
+				boolean isBase = false;
+				List<Input> in   = i.getInputs();
+				List<Output> out = i.getOutputs();
+				String hash = i.getHash();
+				long idx = i.getIndex();	
+				//Coinbase checking is not working right 
+				/*
+				for (Input k : in){
+					if (k.getPreviousOutput() == null && in.size() == 1){
+						isBase = true;
+						break;
+					}
+						
+				}
+				if (isBase == true)
+					break;
+					*/
+				try {
+					for (Input k : in){
+						if (k.getPreviousOutput() == null)
+							break;
+						bw.write(generateInputRecord(idx, hash, k.getPreviousOutput().getAddress(), k.getPreviousOutput().getValue()));
+						bw.newLine();
+					}
+					for (Output l : out){
+						bw.write(generateOutputRecord(idx, hash, l.getAddress(), l.getValue()));
+						bw.newLine();
+					}	
+				} catch (IOException x){
+					System.err.format("IOException");
+					return false;
+				} 
+			}
+		}
+		/**/
 		try {
-			if (bw != null)
-				bw.close();
+			bw.close();
 		}
 		catch (IOException ex){
 			System.err.format("IOException");
