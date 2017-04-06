@@ -15,7 +15,8 @@ public class UserCluster {
 	private Map<Long, List<String>> userMap; // Map a user id to a list of
 												// bitcoin addresses
 	private Map<String, Long> keyMap; // Map a bitcoin address to a user id
-	private Map<Long, List<String>> tempMap;
+	private Map<Long, List<String>> tempMap = new HashMap<Long,List<String>>();
+
 	public UserCluster() {
 		userMap = new HashMap<Long, List<String>>();
 		keyMap = new HashMap<String, Long>();
