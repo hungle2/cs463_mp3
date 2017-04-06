@@ -13,7 +13,7 @@ import java.util.Map;
 
 public class UserCluster {
 	private Map<Long, List<String>> userMap; // Map a user id to a list of
-												// bitcoin addresses
+	// bitcoin addresses
 	private Map<String, Long> keyMap; // Map a bitcoin address to a user id
 	private Map<Long, List<String>> tempMap = new HashMap<Long,List<String>>();
 
@@ -23,11 +23,11 @@ public class UserCluster {
 	}
 
 	/**
-	 * Read transactions from file
-	 *
-	 * @param file
-	 * @return true if read succeeds; false otherwise
-	 */
+	* Read transactions from file
+	*
+	* @param file
+	* @return true if read succeeds; false otherwise
+	*/
 	public boolean readTransactions(String file) {
 		BufferedReader bw = null;
 		try {
@@ -41,11 +41,11 @@ public class UserCluster {
 			try {
 				temp = bw.readLine();
 				if (temp == null)
-					break;
+				break;
 				String[] split_str = temp.split(" ");
 				if (split_str[4].equals("in"))
-					// add in address to the transaction map
-          addAddress(split_str[2],Long.parseLong(split_str[0]));
+				// add in address to the transaction map
+				addAddress(split_str[2],Long.parseLong(split_str[0]));
 			} catch (IOException x){
 				System.err.format("IOException");
 				return false;
@@ -57,107 +57,109 @@ public class UserCluster {
 
 
 	public void addAddress(String addr, long id){
-		/*
-    Long dict_id = keyMap.get(addr);
-    //Add to keyMap
-
-		if (dict_id == null){
-			keyMap.put(addr, id);
-			dict_id = id;
-		}
-	  */
 		List<String> dict_addr = tempMap.get(id);
-    if (dict_addr == null){
-      dict_addr = new ArrayList<String>();
-    }
-	  dict_addr.add(addr);
-    tempMap.put(id,dict_addr);
+		if (dict_addr == null){
+			dict_addr = new ArrayList<String>();
+		}
+		dict_addr.add(addr);
+		tempMap.put(id,dict_addr);
 		return;
 	}
 
 	/**
-	 * Merge addresses based on joint control
-	 */
+	* Merge addresses based on joint control
+	*/
 	public void mergeAddresses() {
-    Long user_count = 0L;
-    for (Map.Entry<Long, List<String>> entry : tempMap.entrySet()) {
-      ArrayList<Long> users = new ArrayList<Long>();
-      for (String address : entry.getValue()) {
-        if (keyMap.containsKey(address)) {
-          long user_id = keyMap.get(address);
-          if (!users.contains(user_id)) {
-          	users.add(user_id);
-          }
-        }
-      }
-      if (users.isEmpty()) {
-        // create new user
-        userMap.put(user_count, new ArrayList<String>());
-        for (String address : entry.getValue()) {
-			List<String> tmp = userMap.get(user_count);
-			tmp.add(address);
-        	userMap.put(user_count, tmp);
-          keyMap.put(address, user_count);
-        }
-        user_count++;
-      } else if (users.size() == 1) {
-        for (String address : entry.getValue()) {
-		  List<String> tmp = userMap.get(users.get(0));
-  		  tmp.add(address);
-  		  userMap.put(users.get(0), tmp);
-          if (!keyMap.containsKey(address)) {
-            keyMap.put(address, users.get(0));
-          }
-        }
-      } else {
-      	mergeIDs(users, entry.getValue());
-      }
-    }
+		Long user_count = 0L;
+		for (Map.Entry<Long, List<String>> entry : tempMap.entrySet()) {
+			ArrayList<Long> users = new ArrayList<Long>();
+			for (String address : entry.getValue()) {
+				if (keyMap.containsKey(address)) {
+					long user_id = keyMap.get(address);
+					if (!users.contains(user_id)) {
+						users.add(user_id);
+					}
+				}
+			}
+			if (users.isEmpty()) {
+				// create new user
+				userMap.put(user_count, new ArrayList<String>());
+				for (String address : entry.getValue()) {
+					List<String> tmp = userMap.get(user_count);
+					tmp.add(address);
+					userMap.put(user_count, tmp);
+					keyMap.put(address, user_count);
+				}
+				user_count++;
+			} else if (users.size() == 1) {
+				for (String address : entry.getValue()) {
+					List<String> tmp = userMap.get(users.get(0));
+					tmp.add(address);
+					userMap.put(users.get(0), tmp);
+					if (!keyMap.containsKey(address)) {
+						keyMap.put(address, users.get(0));
+					}
+				}
+			} else {
+				mergeIDs(users, entry.getValue());
+			}
+		}
+
+		// deal with output only addresses
+		for (String address : ArrayList<String> outputAdd) {
+			if (!keyMap.containsKey(address)) {
+				keyMap.put(address, user_count);
+				ArrayList<String> tmp = new ArrayList<String>();
+				tmp.add(address);
+				userMap.put(user_count);
+				user_count++;
+			}
+		}
 	}
 
-  public void mergeIDs(ArrayList<Long> users, List<String> addresses){
-    Long new_user_id = users.get(0);
-    for (Long user : users) {
-      if (user == new_user_id) {
-        continue;
-      }
-      for (String address : userMap.get(user)) {
-		List<String> tmp = userMap.get(new_user_id);
-		tmp.add(address);
-        userMap.put(new_user_id, tmp);
-        keyMap.put(address, new_user_id);
-      }
-      userMap.remove(user);
-    }
-    for (String address : addresses) {
-      if (!userMap.get(new_user_id).contains(address)) {
-		List<String> tmp = userMap.get(new_user_id);
-  		tmp.add(address);
-        userMap.put(new_user_id, tmp);
-        keyMap.put(address, new_user_id);
-      }
-    }
-  }
+	public void mergeIDs(ArrayList<Long> users, List<String> addresses){
+		Long new_user_id = users.get(0);
+		for (Long user : users) {
+			if (user == new_user_id) {
+				continue;
+			}
+			for (String address : userMap.get(user)) {
+				List<String> tmp = userMap.get(new_user_id);
+				tmp.add(address);
+				userMap.put(new_user_id, tmp);
+				keyMap.put(address, new_user_id);
+			}
+			userMap.remove(user);
+		}
+		for (String address : addresses) {
+			if (!userMap.get(new_user_id).contains(address)) {
+				List<String> tmp = userMap.get(new_user_id);
+				tmp.add(address);
+				userMap.put(new_user_id, tmp);
+				keyMap.put(address, new_user_id);
+			}
+		}
+	}
 
 	/**
-	 * Return number of users (i.e., clusters) in the transaction dataset
-	 *
-	 * @return number of users (i.e., clusters)
-	 */
+	* Return number of users (i.e., clusters) in the transaction dataset
+	*
+	* @return number of users (i.e., clusters)
+	*/
 	public int getUserNumber() {
 		return userMap.size();
 	}
 
 	/**
-	 * Return the largest cluster size
-	 *
-	 * @return size of the largest cluster
-	 */
+	* Return the largest cluster size
+	*
+	* @return size of the largest cluster
+	*/
 	public int getLargestClusterSize() {
 		int max = 0;
 		for (List<String> i : userMap.values() ){
 			if (max < i.size())
-				max = i.size();
+			max = i.size();
 		}
 		return max;
 	}

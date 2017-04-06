@@ -29,8 +29,8 @@ public class UserClusterTest {
 			System.err.println("Cannot write to cp2.txt!");
 			e.printStackTrace();
 		}
-		
-		if (!uc.writeUserGraph("transactions.txt", "userGraph.txt")){
+
+		if (!uc.writeUserGraph("transactions_eg.txt", "userGraph.txt")){
 			System.err.println("Cannot write user graph!");
 		}
 
