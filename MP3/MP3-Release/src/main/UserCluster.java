@@ -16,7 +16,7 @@ public class UserCluster {
 	// bitcoin addresses
 	private Map<String, Long> keyMap; // Map a bitcoin address to a user id
 	private Map<Long, List<String>> tempMap = new HashMap<Long,List<String>>();
-
+	private List<String> outputAdd = new ArrayList<String>();
 	public UserCluster() {
 		userMap = new HashMap<Long, List<String>>();
 		keyMap = new HashMap<String, Long>();
@@ -44,8 +44,9 @@ public class UserCluster {
 				break;
 				String[] split_str = temp.split(" ");
 				if (split_str[4].equals("in"))
-				// add in address to the transaction map
-				addAddress(split_str[2],Long.parseLong(split_str[0]));
+        	addAddress(split_str[2],Long.parseLong(split_str[0]));
+        else
+        	outputAdd.add(split_str[2]);
 			} catch (IOException x){
 				System.err.format("IOException");
 				return false;
@@ -106,12 +107,12 @@ public class UserCluster {
 		}
 
 		// deal with output only addresses
-		for (String address : ArrayList<String> outputAdd) {
+		for (String address : outputAdd) {
 			if (!keyMap.containsKey(address)) {
 				keyMap.put(address, user_count);
 				ArrayList<String> tmp = new ArrayList<String>();
 				tmp.add(address);
-				userMap.put(user_count);
+				userMap.put(user_count, tmp);
 				user_count++;
 			}
 		}
@@ -186,6 +187,12 @@ public class UserCluster {
 		return true;
 	}
 
+	public void printKeymap(){
+		for (Map.Entry<String,Long> entry : keyMap.entrySet()) {
+			System.out.println(entry.getKey() + " " + entry.getValue());
+		}
+
+	}
 	public boolean writeKeyMap(String file) {
 		try {
 			BufferedWriter w = new BufferedWriter(new FileWriter(file));
