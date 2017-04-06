@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -14,7 +15,7 @@ public class UserCluster {
 	private Map<Long, List<String>> userMap; // Map a user id to a list of
 												// bitcoin addresses
 	private Map<String, Long> keyMap; // Map a bitcoin address to a user id
-
+	private Map<Long, List<String>> tempMap;
 	public UserCluster() {
 		userMap = new HashMap<Long, List<String>>();
 		keyMap = new HashMap<String, Long>();
@@ -22,19 +23,18 @@ public class UserCluster {
 
 	/**
 	 * Read transactions from file
-	 * 
+	 *
 	 * @param file
 	 * @return true if read succeeds; false otherwise
 	 */
 	public boolean readTransactions(String file) {
-
 		BufferedReader bw = null;
 		try {
 			bw = new BufferedReader(new FileReader(file));
 		} catch (IOException x){
 			System.err.format("IOException");
 			return false;
-		} 
+		}
 		String temp = "";
 		while (true){
 			try {
@@ -42,29 +42,97 @@ public class UserCluster {
 				if (temp == null)
 					break;
 				String[] split_str = temp.split(" ");
-				//GET DATA, but what to fill up with?
-								
+				if (split_str[4].equals("in"))
+					// add in address to the transaction map
+          addAddress(split_str[2],Long.parseLong(split_str[0]));
 			} catch (IOException x){
 				System.err.format("IOException");
 				return false;
-			} 	
+			}
 		}
-		
-		
 
 		return true;
+	}
+
+
+	public void addAddress(String addr, long id){
+		/*
+    Long dict_id = keyMap.get(addr);
+    //Add to keyMap
+
+		if (dict_id == null){
+			keyMap.put(addr, id);
+			dict_id = id;
+		}
+	  */
+		List<String> dict_addr = tempMap.get(id);
+    if (dict_addr == null){
+      dict_addr = new ArrayList<String>();
+    }
+	  dict_addr.add(addr);
+    tempMap.put(id,dict_addr);
+		return;
 	}
 
 	/**
 	 * Merge addresses based on joint control
 	 */
 	public void mergeAddresses() {
-		// TODO implement me
+    Long user_count = 0;
+    for (Map.Entry<String, List<String>> entry : tempMap.entrySet()) {
+      ArrayList<Long> users = new ArrayList<Long>();
+      for (String address : entry.getValue()) {
+        if (keyMap.has(address)) {
+          int user_id = keyMap.get(address);
+          if (!users.contains(user_id)) {
+          	users.add(user_id);
+          }
+        }
+      }
+      if (users.empty()) {
+        // create new user
+        userMap.put(user_count, new ArrayList<String>());
+        for (String address : entry.getValue()) {
+        	userMap.put(user_count, userMap.get(user_count).add(address));
+          keyMap.put(address, user_count);
+        }
+        user_count++;
+      } else if (users.size() == 1) {
+        for (String address : entry.getValue()) {
+          userMap.put(users.get(0), userMap.get(users.get(0)).add(address));
+          if (!keyMap.has(address)) {
+            keyMap.put(address, users.get(0));
+          }
+        }
+      } else {
+      	mergeIDs(users, entry.getValue());
+      }
+    }
 	}
+
+  public void mergeIDs(ArrayList<Long> users, List<String> addresses){
+    Long new_user_id = users.get(0);
+    for (Long user : users) {
+      if (user == new_user_id) {
+        continue;
+      }
+      for (String address : userMap.get(user)) {
+        userMap.put(new_user_id, userMap.get(new_user_id).add(address));
+        keyMap.put(address, new_user_id);
+      }
+      userMap.remove(user);
+    }
+    for (String address : addresses) {
+      if (!userMap.get(new_user_id).contains(address)) {
+        userMap.put(new_user_id, userMap.get(new_user_id).add(address));
+        keyMap.put(address, new_user_id);
+      }
+    }
+  }
 
 	/**
 	 * Return number of users (i.e., clusters) in the transaction dataset
-	 * 
+	 *
 	 * @return number of users (i.e., clusters)
 	 */
 	public int getUserNumber() {
@@ -73,7 +141,7 @@ public class UserCluster {
 
 	/**
 	 * Return the largest cluster size
-	 * 
+	 *
 	 * @return size of the largest cluster
 	 */
 	public int getLargestClusterSize() {
@@ -137,7 +205,7 @@ public class UserCluster {
 					r1.close();
 					return false;
 				}
-				if (s[4].equals("in") && !txUserMap.containsKey(s[0])) { // new transaction 
+				if (s[4].equals("in") && !txUserMap.containsKey(s[0])) { // new transaction
 					Long user;
 					if ((user=keyMap.get(s[2])) == null) {
 						System.err.println(s[2] + " is not in the key map!");
@@ -145,10 +213,10 @@ public class UserCluster {
 						return false;
 					}
 					txUserMap.put(s[0], user);
-				} 
+				}
 			}
 			r1.close();
-			
+
 			BufferedReader r2 = new BufferedReader(new FileReader(txFile));
 			BufferedWriter w = new BufferedWriter(new FileWriter(userGraphFile));
 			while ((nextLine = r2.readLine()) != null) {
@@ -178,7 +246,7 @@ public class UserCluster {
 						return false;
 					}
 					w.write(inputUser + "," + outputUser + "," + s[3] + "\n");
-				} 
+				}
 			}
 			r2.close();
 			w.flush();
