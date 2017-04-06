@@ -78,29 +78,33 @@ public class UserCluster {
 	 * Merge addresses based on joint control
 	 */
 	public void mergeAddresses() {
-    Long user_count = 0;
-    for (Map.Entry<String, List<String>> entry : tempMap.entrySet()) {
+    Long user_count = 0L;
+    for (Map.Entry<Long, List<String>> entry : tempMap.entrySet()) {
       ArrayList<Long> users = new ArrayList<Long>();
       for (String address : entry.getValue()) {
-        if (keyMap.has(address)) {
-          int user_id = keyMap.get(address);
+        if (keyMap.containsKey(address)) {
+          long user_id = keyMap.get(address);
           if (!users.contains(user_id)) {
           	users.add(user_id);
           }
         }
       }
-      if (users.empty()) {
+      if (users.isEmpty()) {
         // create new user
         userMap.put(user_count, new ArrayList<String>());
         for (String address : entry.getValue()) {
-        	userMap.put(user_count, userMap.get(user_count).add(address));
+			List<String> tmp = userMap.get(user_count);
+			tmp.add(address);
+        	userMap.put(user_count, tmp);
           keyMap.put(address, user_count);
         }
         user_count++;
       } else if (users.size() == 1) {
         for (String address : entry.getValue()) {
-          userMap.put(users.get(0), userMap.get(users.get(0)).add(address));
-          if (!keyMap.has(address)) {
+		  List<String> tmp = userMap.get(users.get(0));
+  		  tmp.add(address);
+  		  userMap.put(users.get(0), tmp);
+          if (!keyMap.containsKey(address)) {
             keyMap.put(address, users.get(0));
           }
         }
@@ -117,14 +121,18 @@ public class UserCluster {
         continue;
       }
       for (String address : userMap.get(user)) {
-        userMap.put(new_user_id, userMap.get(new_user_id).add(address));
+		List<String> tmp = userMap.get(new_user_id);
+		tmp.add(address);
+        userMap.put(new_user_id, tmp);
         keyMap.put(address, new_user_id);
       }
       userMap.remove(user);
     }
     for (String address : addresses) {
       if (!userMap.get(new_user_id).contains(address)) {
-        userMap.put(new_user_id, userMap.get(new_user_id).add(address));
+		List<String> tmp = userMap.get(new_user_id);
+  		tmp.add(address);
+        userMap.put(new_user_id, tmp);
         keyMap.put(address, new_user_id);
       }
     }
