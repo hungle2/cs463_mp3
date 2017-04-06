@@ -30,16 +30,14 @@ public class DatasetGenerator {
 		BlockExplorer be = new BlockExplorer();
 
 		List<Block> lb = new ArrayList<Block>();
-
+		
 		try{
 			for (long i = 265852; i <= 266085; i++)
 				lb.addAll(be.getBlocksAtHeight(i));
 		}
 		catch (Exception e){
-			System.err.format("Error fetching blocks");
+			System.err.format("Error fetching blocks!\n");
 		}
-
-		System.out.println("Blocks fetched");
 		for (Block j : lb){
 			List<Transaction> t = j.getTransactions();
 
