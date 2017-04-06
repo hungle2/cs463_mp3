@@ -108,7 +108,7 @@ public class UserCluster {
 
 		// deal with output only addresses
 		for (String address : outputAdd) {
-			if (!keyMap.containsKey(address)) {
+			if (!keyMap.containsKey(address)) {																																																																																																																																																																																																																																																																																																																																								
 				keyMap.put(address, user_count);
 				ArrayList<String> tmp = new ArrayList<String>();
 				tmp.add(address);
